@@ -16,3 +16,4 @@ Last updated: January 2026
 This repository is used to practice Git workflows
 Instructor materials will be copied as required
 Course materials copied from Data_Course repository
+The purpose of this is to practice.
