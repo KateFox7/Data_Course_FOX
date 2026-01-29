@@ -8,3 +8,8 @@ This repository contains my work for the Data Course
 This repository will include assignments, data, and exercises
 Last updated: January 2026
 ## Course Structure
+- Assignments
+- Code Examples
+- Data
+- Exercises
+- Readings
