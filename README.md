@@ -15,3 +15,4 @@ Last updated: January 2026
 - Readings
 This repository is used to practice Git workflows
 Instructor materials will be copied as required
+Course materials copied from Data_Course repository
