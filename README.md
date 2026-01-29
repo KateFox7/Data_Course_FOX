@@ -14,3 +14,4 @@ Last updated: January 2026
 - Exercises
 - Readings
 This repository is used to practice Git workflows
+Instructor materials will be copied as required
