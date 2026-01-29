@@ -13,3 +13,4 @@ Last updated: January 2026
 - Data
 - Exercises
 - Readings
+This repository is used to practice Git workflows
