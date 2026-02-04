@@ -1,0 +1,15 @@
+Data Analysis Final Project Idea:
+
+I plan to analyze stress-related gene expression responses in juvenile penguins using data from GEO (GSE17725). 
+The goal is to identify genes that are up or down regulated in response to environmental stress.
+
+Data Description:
+
+The data consists of normalized gene expression counts (rows = genes, columns = samples). 
+Sample metadata includes Condition (Stress or Control), Sample ID, and potentially other variables like tissue type or sex. 
+The csv file contains expression values suitable for plotting and analysis.
+
+Expected Results:
+
+I expect to see certain stress-response genes (like heat shock proteins) significantly up-regulated in stressed penguins. 
+Plots will include boxplots of gene expression by condition, and potentially PCA plots or heatmaps in the full analysis.
