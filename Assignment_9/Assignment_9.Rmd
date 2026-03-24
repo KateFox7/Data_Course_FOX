@@ -1,0 +1,131 @@
+---
+title: 'Assignment 9: Graduate School Admissions'
+author: "Kate Fox"
+date: "2026-03-24"
+output: html_document
+---
+
+### Introduction ###
+
+In this assignment, I analyzed predictors of graduate school admissions using GPA, GRE, and undergraduate school ranking.
+
+### Data Loading & Cleaning ###
+```{r}
+library(tidyverse)
+admissions <- read_csv("GradSchool_Admissions.csv")
+glimpse(admissions)
+summary(admissions)
+
+admissions <- admissions %>%
+  mutate(
+    admit = as.factor(admit),
+    rank = as.factor(rank)
+  )
+``` 
+### Exploratory Data Analysis ###
+```{r}
+# GPA vs Admission
+ggplot(admissions, aes(x = gpa, fill = admit)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "GPA Distribution by Admission Status", x = "GPA", fill = "Admit")
+
+# GRE vs Admission
+ggplot(admissions, aes(x = gre, fill = admit)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "GRE Distribution by Admission Status", x = "GRE", fill = "Admit")
+
+# Rank vs Admission
+ggplot(admissions, aes(x = rank, fill = admit)) +
+  geom_bar(position = "fill") +
+  labs(title = "Proportion of Admissions by Undergraduate Rank", y = "Proportion", fill = "Admit")
+```
+The first two graphs indicate that higher GPA and GRE increase admission probability. A higher rank (1) has higher proportion of admitted students, so rank does matter.
+
+### Model Building ###
+# Model 1
+```{r}
+# Model 1: GPA only
+mod1 <- glm(admit ~ gpa, data = admissions, family = binomial)
+summary(mod1)
+
+# Model 2: GPA + GRE
+mod2 <- glm(admit ~ gpa + gre, data = admissions, family = binomial)
+summary(mod2)
+
+# Model 3: GPA + GRE + Rank
+mod3 <- glm(admit ~ gpa + gre + rank, data = admissions, family = binomial)
+summary(mod3)
+
+# Compare models
+AIC(mod1, mod2, mod3)
+```
+GPA is significant on it's own. Adding GRE improves the model slightly. Rank is significant, so model 3 is the best when comparing with AIC.
+
+### Model Evaluation & Predicted Probabilities ###
+# Add Predicted Probabilities from Model 3
+```{r}
+admissions <- admissions %>%
+  mutate(pred_prob = predict(mod3, type = "response"))
+admissions
+```
+# Plot Predicted Probabilities by Actual Admission
+```{r}
+ggplot(admissions, aes(x = pred_prob, fill = admit)) +
+  geom_histogram(position = "identity", alpha = 0.5, bins = 20) +
+  labs(title = "Predicted Admission Probabilities (mod3)",
+       x = "Predicted Probability of Admission",
+       y = "Count",
+       fill = "Admit")
+```
+The histogram shows that students who were admitted tend to have higher predicted
+probabilities, which suggests that our model is reasonable in comparing admitted and
+non-admitted students.
+
+### Odds Ratios for Interpretation ###
+```{r}
+# Odds Ratios
+odds_ratios <- exp(coef(mod3))
+odds_ratios
+
+# Display as a Table
+data.frame(
+  Predictor = names(odds_ratios),
+  Odds_Ratio = odds_ratios
+)
+```
+Odds ratios show how each predictor affects the odds of admission. A GPA odds ratio of >1 means higher GPA increases the odds of being admitted.
+
+#Visualizing Effects of Rank
+```{r}
+### Admission Probability by Rank ###
+# Predict admission probability for each rank at average GRE and GPA
+avg_gre <- mean(admissions$gre)
+avg_gpa <- mean(admissions$gpa)
+
+rank_pred <- data.frame(
+  gre = avg_gre,
+  gpa = avg_gpa,
+  rank = factor(1:4, levels = levels(admissions$rank))
+)
+rank_pred$pred_prob <- predict(mod3, newdata = rank_pred, type = "response")
+
+ggplot(rank_pred, aes(x = rank, y = pred_prob)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Predicted Probability of Admission by Rank",
+       x = "Undergraduate Institution Rank",
+       y = "Predicted Probability")
+```
+Holding GRE and GPA constant, top-tier schools (Rank 1) have higher predicted probabilities of admission compared to lower-ranked schools, confirming that undergraduate rank matters.
+
+### Conclusion ###
+
+GPA was a strong predictor of graduate school admission, with higher GPA values
+associated with increased probability of acceptance. GRE scores showed a weaker
+effect, suggesting they are less important than GPA.
+
+Undergraduate rank significantly affects admission, with students from top-tier
+schools having a higher admission rate. The regression model including GPA, GRE, and
+rank (mod3) fits the data best because it has the lowest AIC.
+
+Predicted probabilities and odds ratios provide interpretable insights for
+understanding admission likelihood.
