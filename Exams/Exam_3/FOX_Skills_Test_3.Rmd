@@ -1,0 +1,111 @@
+---
+title: "Exam 3 Skills Test"
+author: "Kate Fox"
+date: "April 8, 2026"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
+library(tidyverse)
+library(broom)
+```
+
+# Load & Clean Faculty Salaries
+In this section, I loaded the faculty salary dataset and transformed it into a tidy format. Tidying the data ensures that each row represents a single observation of salary by state, rank, and tier, making it easier to analyze and visualize.
+```{r}
+# Load dataset
+salaries <- read.csv("FacultySalaries_1995.csv")
+glimpse(salaries)
+
+# Clean the data set
+salaries_tidy <- salaries %>%
+  pivot_longer(
+    cols = c(AvgFullProfSalary, AvgAssocProfSalary, AvgAssistProfSalary),
+    names_to = "Rank",
+    values_to = "Salary"
+  ) %>%
+  mutate(
+    Rank = case_when(
+      Rank == "AvgFullProfSalary" ~ "Full",
+      Rank == "AvgAssocProfSalary" ~ "Associate",
+      Rank == "AvgAssistProfSalary" ~ "Assistant"
+    )
+  )
+```
+
+To better understand salary distributions, I visualized salaries across faculty ranks and institutional tiers.
+```{r}
+salaries_tidy %>%
+  filter(Tier %in% c("I", "IIA", "IIB")) %>%
+  ggplot(aes(x = Rank, y = Salary, fill = Rank)) +
+  geom_boxplot() +
+  facet_wrap(~ Tier) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Rank", y = "Salary")
+```
+
+# ANOVA Model
+To evaluate whether State, Tier, and Rank have significant effects on salary, I fit an ANOVA model without interaction terms. This model allows us to assess the independent contribution of each factor.
+```{r}
+anova_model <- aov(Salary ~ State + Tier + Rank, data = salaries_tidy)
+summary(anova_model)
+```
+
+The ANOVA output identifies which factors significantly influence salary variation across institutions.
+
+# Load & Tidy Juniper Oils
+Next, I loaded the Juniper Oils dataset and reshaped it into a tidy format. Each row now represents a single chemical concentration measurement for a given observation.
+```{r}
+# Load dataset
+oils <- read_csv("Juniper_Oils.csv")
+
+# List of chemical variables
+chemicals <- c("alpha-pinene","para-cymene","alpha-terpineol","cedr-9-ene",
+               "alpha-cedrene","beta-cedrene","cis-thujopsene","alpha-himachalene",
+               "beta-chamigrene","cuparene","compound 1","alpha-chamigrene",
+               "widdrol","cedrol","beta-acorenol","alpha-acorenol",
+               "gamma-eudesmol","beta-eudesmol","alpha-eudesmol",
+               "cedr-8-en-13-ol","cedr-8-en-15-ol","compound 2","thujopsenal")
+
+# Tidy dataset
+oils_tidy <- oils %>%
+  pivot_longer(
+    cols = all_of(chemicals),
+    names_to = "ChemicalID",
+    values_to = "Concentration"
+  )
+```
+
+# Faceted Visualization
+To explore how chemical concentrations vary with time since burn, I created faceted plots for each compound. This allows for easy comparison of trends across many chemicals.
+```{r}
+ggplot(oils_tidy, aes(x = YearsSinceBurn, y = Concentration)) +
+  geom_point() +
+  geom_smooth(method = "loess", se = TRUE) +
+  facet_wrap(~ChemicalID, scales = "free_y") +
+  theme_minimal() +
+  labs(
+    title = "Chemical Concentration vs. Years Since Burn",
+    x = "Years Since Burn",
+    y = "Concentration"
+  )
+```
+
+# Linear Model for Significant Chemicals
+To determine which chemicals are significantly affected by time since burn, I fit a linear model including an interaction between chemical identity and time. This allows each chemical to have its own slope.
+```{r}
+glm_model <- lm(Concentration ~ ChemicalID * YearsSinceBurn, data = oils_tidy)
+
+# Extract model results
+results <- tidy(glm_model)
+
+# Filter significant terms
+significant_results <- results %>%
+  filter(p.value < 0.05)
+
+significant_results
+```
+
+The significant interaction terms indicate which chemicals show meaningful changes in concentration over time since burn.
