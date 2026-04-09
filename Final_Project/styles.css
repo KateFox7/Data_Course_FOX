@@ -1,0 +1,48 @@
+/* Remove ugly box around TOC */
+#TOC {
+  background: none;
+  border: none;
+}
+
+/* Make TOC text not wrap awkwardly */
+#TOC ul {
+  white-space: normal;
+}
+
+/* Improve spacing */
+#TOC ul li {
+  margin-bottom: 6px;
+}
+
+/* Change TOC text color */
+#TOC a {
+  color: #2c3e50;   /* dark blue-gray */
+  text-decoration: none;
+}
+
+/* Highlight current section */
+#TOC a.active {
+  color: #forestgreen;   /* nice red highlight */
+  font-weight: bold;
+}
+
+/* Change font size */
+body {
+  font-family: "Calibri (Body)";
+  font-size: 17px;
+}
+
+/* Remove extra space */
+.tocify-extend-page {
+  display: none !important;
+  height: 0 !important;
+}
+
+/* Bold the Titles and Subtitles */
+h1 {
+  font-weight: 500;  /* strong bold for main title */
+}
+
+h2, h3 {
+  font-weight: 400;  /* lighter bold for subtitles */
+}
